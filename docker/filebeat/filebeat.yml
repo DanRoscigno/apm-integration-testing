@@ -31,6 +31,26 @@ filebeat.autodiscover:
       templates:
         - condition:
             contains:
+              docker.container.image: redis
+          config:
+            - module: redis
+              log:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+        - condition:
+            contains:
+              docker.container.image: postgres
+          config:
+            - module: postgresql
+              log:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+        - condition:
+            contains:
               docker.container.name: "opbeans-"
           config:
             - type: container
@@ -144,17 +164,6 @@ filebeat.autodiscover:
                      to: "error_apm_server"
                   ignore_missing: false
                   fail_on_error: true
-        - condition:
-            contains:
-              docker.container.name: "postgres"
-          config:
-            - type: container
-              paths:
-                - "/var/lib/docker/containers/*/${data.docker.container.id}-json.log"
-              tail_files: true
-              multiline.pattern: '^\t'
-              multiline.negate: false
-              multiline.match: after
         - condition:
             and:
               - not:
